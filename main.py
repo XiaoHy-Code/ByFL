@@ -17,7 +17,7 @@ from model.Models import *
 from model.resnetcifar import *
 from utils import *
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 os.environ["OMP_NUM_THREADS"] = '1'
 
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     if args['dataset'] == 'mnist':
         net = Mnist_2NN()
         init_img = torch.zeros((1, 1, 28, 28), device=dev)
-        n_comm_rounds = 20
+        n_comm_rounds = 100
         batchsize = 64
 
     elif args['dataset'] == 'emnist':
@@ -165,6 +165,7 @@ if __name__ == "__main__":
 
     # ---------------------------------------以上准备工作已经完成------------------------------------------#
     if args['debug']:
+        n_comm_rounds = 20
         # 调试简化客户端
         num_in_comm = 10
         clients_all = ['client{}'.format(i) for i in range(0, num_in_comm)]
