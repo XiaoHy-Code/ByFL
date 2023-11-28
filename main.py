@@ -26,7 +26,7 @@ def get_args():
     parser.add_argument('--debug', type=bool, default=True, help='True, False')
     parser.add_argument('--byz_type', type=str, default="Scaling_attack",
                         help="LF_attack,GS_attack,LIT_attack,Scaling_attack,no_attack")
-    parser.add_argument('--agg_type', type=str, default="pca_hdbscan_c",
+    parser.add_argument('--agg_type', type=str, default="FLDetector",
                         help="average, multi_krum, auror, foolsgold, FLDetector, pca_kmeans_a,  pca_agglomer_c,"
                              "pca_agglomer_a, pca_hdbscan_b,pca_hdbscan_c")
     parser.add_argument('-dataset', "--dataset", type=str, default="mnist", help="mnist,emnist,cifar10")
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     # 初始化模型  init_img TensorBoard展示模型
     if args['dataset'] == 'mnist':
-        net = Mnist_2NN()
+        net = Mnist_CNN()
         init_img = torch.zeros((1, 1, 28, 28), device=dev)
         n_comm_rounds = 100
         batchsize = 64
@@ -297,7 +297,8 @@ if __name__ == "__main__":
             for i in range(len(client_params_list)):
                 client_grad_list.append((global_weight - client_params_list[i]) / args['learning_rate'])
 
-            global_grad = torch.mean(torch.cat(client_grad_list, dim=1), dim=-1, keepdim=True)  # ??? 直接求均值得到全局梯度？
+            # global_grad = torch.mean(torch.cat(client_grad_list, dim=1), dim=-1, keepdim=True)  # ??? 直接求均值得到全局梯度？
+            benign_grad = []
 
             if round > N:
                 print("开始计算海森矩阵")
@@ -328,6 +329,14 @@ if __name__ == "__main__":
                             detect_malicious_client.append('client{}'.format(i))
                         else:
                             benign_client_params[client] = client_params[client]
+                            cur_grap = client_grad_list[i]
+                            benign_grad = cur_grap if len(benign_grad) == 0 else torch.cat(
+                                (benign_grad, cur_grap), 1)
+
+            if len(benign_client_params) == 0:
+                global_grad = torch.mean(torch.cat(client_grad_list, dim=1), dim=-1, keepdim=True)
+            else:
+                global_grad = torch.mean(benign_grad, dim=-1, keepdim=True)  # 使用良性客户端的梯度
 
             if round > 0:
                 weight_record.append(global_weight - last_weight)

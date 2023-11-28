@@ -180,8 +180,8 @@ class GetDataSet(object):
 
     def load_cifar10_data(self, datadir, noise_level=0):
 
-        train_set = torchvision.datasets.CIFAR10(root=datadir, train=True, download=False)
-        test_set = torchvision.datasets.CIFAR10(root=datadir, train=False, download=False)
+        train_set = torchvision.datasets.CIFAR10(root=datadir, train=True, download=True)
+        test_set = torchvision.datasets.CIFAR10(root=datadir, train=False, download=True)
 
         train_data = train_set.data  # (50000, 32, 32, 3)
         train_labels = np.array(train_set.targets)  # 将标签转化为
